@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://i.imgur.com/uVax93w.jpg" alt="Link Up Hub Logo" width="150px">
+  <img src="/images/linkup hub logo.jpg" alt="Link Up Hub Logo" width="150px">
   <h1>Link Up Hub</h1>
   <p>
     <strong>A modern, secure, and vibrant community-driven platform for event management, networking, and real-time engagement.</strong>
