@@ -1,12 +1,49 @@
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import type { Metadata } from 'next';
 
-interface EventPageProps {
-  params: { id: string };
+type Props = {
+  params: { id: string }
 }
 
-export default async function EventPage({ params }: EventPageProps) {
-  const supabase = createClient();
+// Generates dynamic metadata for SEO
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const supabase = createSupabaseServerClient();
+  const { data: event } = await supabase
+    .from('events')
+    .select('title, description, poster_url')
+    .eq('id', params.id)
+    .single();
+
+  if (!event) {
+    return {
+      title: 'Event Not Found',
+    }
+  }
+
+  return {
+    title: `${event.title} | Link Up Hub`,
+    description: event.description,
+    openGraph: {
+      title: event.title,
+      description: event.description,
+      images: [
+        {
+          url: event.poster_url || '/default-og-image.png',
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    // JSON-LD Structured Data for Rich Snippets in Google
+    alternates: {
+      canonical: `/events/${params.id}`,
+    },
+  }
+}
+
+export default async function EventDetailPage({ params }: Props) {
+  const supabase = createSupabaseServerClient();
   const { data: event } = await supabase
     .from('events')
     .select('*')
@@ -18,64 +55,33 @@ export default async function EventPage({ params }: EventPageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">{event.title}</h1>
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
-          <div className="aspect-w-16 aspect-h-9 mb-6">
-            <img
-              src={event.image_url || '/placeholder-event.jpg'}
-              alt={event.title}
-              className="rounded-lg w-full h-auto"
-            />
-          </div>
-          <div className="prose max-w-none">
-            <p className="text-gray-600 mb-4">
-              {new Date(event.date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-            <p className="text-gray-600 mb-4">Location: {event.location}</p>
-            <p className="text-lg">{event.description}</p>
-          </div>
-        </div>
-        <div>
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Event Details</h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-medium text-gray-700">Date & Time</h3>
-                <p>
-                  {new Date(event.date).toLocaleString('en-US', {
-                    dateStyle: 'full',
-                    timeStyle: 'short',
-                  })}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-700">Location</h3>
-                <p>{event.location}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-700">Price</h3>
-                <p>{event.price > 0 ? `$${event.price.toFixed(2)}` : 'Free'}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-700">Capacity</h3>
-                <p>{event.capacity} attendees</p>
-              </div>
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                Get Tickets
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <main className="container mx-auto p-4 bg-brand-bg text-brand-primary">
+      {/* Structured data for Google Events */}
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": event.title,
+            "startDate": event.event_date,
+            "description": event.description,
+            "image": event.poster_url,
+            "location": {
+              "@type": "Place",
+              "name": event.location
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": event.price,
+              "priceCurrency": "KES",
+              "url": `https://linkuphub.com/events/${event.id}`,
+              "availability": "https://schema.org/InStock"
+            }
+        })}}
+      />
+      <h1 className="text-4xl font-bold">{event.title}</h1>
+      <img src={event.poster_url} alt={event.title} className="my-4 rounded-lg shadow-lg" />
+      <p>{event.description}</p>
+      {/* ... Add RSVP button and other details here ... */}
+    </main>
   );
 }
