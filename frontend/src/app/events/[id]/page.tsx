@@ -8,7 +8,7 @@ type Props = {
 
 // Generates dynamic metadata for SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient(); // Added 'await' here
   const { data: event } = await supabase
     .from('events')
     .select('title, description, poster_url')
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function EventDetailPage({ params }: Props) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient(); // Added 'await' here
   const { data: event } = await supabase
     .from('events')
     .select('*')
