@@ -1,87 +1,61 @@
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
+// Import necessary components
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
-type Props = {
-  params: { id: string }
+// Define the Event type
+type Event = {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  event_date: string;
+};
+
+// Fetch all events on the server.
+async function getEvents(): Promise<Event[]> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/events`, {
+    cache: 'no-store', // Ensures the data is fetched fresh on every request
+  });
+  if (!res.ok) {
+    throw new Error('Failed to fetch events');
+  }
+  return res.json();
 }
 
-// Generates dynamic metadata for SEO
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const supabase = await createSupabaseServerClient(); // Added 'await' here
-  const { data: event } = await supabase
-    .from('events')
-    .select('title, description, poster_url')
-    .eq('id', params.id)
-    .single();
-
-  if (!event) {
-    return {
-      title: 'Event Not Found',
-    }
-  }
-
-  return {
-    title: `${event.title} | Link Up Hub`,
-    description: event.description,
-    openGraph: {
-      title: event.title,
-      description: event.description,
-      images: [
-        {
-          url: event.poster_url || '/default-og-image.png',
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-    // JSON-LD Structured Data for Rich Snippets in Google
-    alternates: {
-      canonical: `/events/${params.id}`,
-    },
-  }
-}
-
-export default async function EventDetailPage({ params }: Props) {
-  const supabase = await createSupabaseServerClient(); // Added 'await' here
-  const { data: event } = await supabase
-    .from('events')
-    .select('*')
-    .eq('id', params.id)
-    .single();
-
-  if (!event) {
-    notFound();
-  }
+// The main component for the events list page.
+export default async function EventsPage() {
+  const events = await getEvents();
 
   return (
-    <main className="container mx-auto p-4 bg-brand-bg text-brand-primary">
-      {/* Structured data for Google Events */}
-      <script type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Event",
-            "name": event.title,
-            "startDate": event.event_date,
-            "description": event.description,
-            "image": event.poster_url,
-            "location": {
-              "@type": "Place",
-              "name": event.location
-            },
-            "offers": {
-              "@type": "Offer",
-              "price": event.price,
-              "priceCurrency": "KES",
-              "url": `https://linkuphub.com/events/${event.id}`,
-              "availability": "https://schema.org/InStock"
-            }
-        })}}
-      />
-      <h1 className="text-4xl font-bold">{event.title}</h1>
-      <img src={event.poster_url} alt={event.title} className="my-4 rounded-lg shadow-lg" />
-      <p>{event.description}</p>
-      {/* ... Add RSVP button and other details here ... */}
-    </main>
+    <div className="container mx-auto py-10 px-4 bg-brand-bg">
+      <h1 className="text-4xl font-bold mb-8 text-center text-brand-primary">
+        Discover Events
+      </h1>
+      {events.length === 0 ? (
+        <p className="text-center text-gray-600">No events found. Please check back later!</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {events.map((event) => (
+            <Card key={event.id} className="flex flex-col">
+              <CardHeader>
+                <CardTitle>{event.title}</CardTitle>
+                <CardDescription>
+                  {new Date(event.event_date).toUTCString()} - @{event.location}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col justify-between">
+                <p className="text-gray-700 mb-4 line-clamp-4">{event.description}</p>
+                <Button asChild className="mt-auto w-full bg-brand-accent hover:bg-blue-700">
+                  <Link href={`/events/${event.id}`}>
+                    Learn More & RSVP
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
