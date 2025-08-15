@@ -37,7 +37,7 @@ export default async function DashboardPage() {
     <div className="container mx-auto py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Welcome back, {profile?.username || 'User'}!</h1>
-        <p className="text-muted-foreground">Here's your dashboard overview.</p>
+        <p className="text-muted-foreground">Here is your dashboard overview.</p>
       </div>
 
       {/* Only show the "Create Event" button to Admins */}
