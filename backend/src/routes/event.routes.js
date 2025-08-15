@@ -28,3 +28,29 @@ router.delete('/:id', protect, checkRole(['Admin', 'Super Admin']), deleteEvent)
 
 // Export the router to be used in the main server file.
 export default router;
+const express = require('express');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth.middleware');
+const { 
+  createEvent, 
+  getAllEvents, 
+  getEventById, 
+  updateEvent, 
+  deleteEvent,
+  rsvpToEvent
+} = require('../controllers/event.controller');
+
+const router = express.Router();
+
+// Public routes
+router.get('/', getAllEvents);
+router.get('/:id', getEventById);
+
+// Protected routes
+router.post('/', authenticateToken, authorizeRoles(['admin', 'super_admin']), createEvent);
+router.put('/:id', authenticateToken, authorizeRoles(['admin', 'super_admin']), updateEvent);
+router.delete('/:id', authenticateToken, authorizeRoles(['admin', 'super_admin']), deleteEvent);
+
+// RSVP route
+router.post('/:id/rsvp', authenticateToken, rsvpToEvent);
+
+module.exports = router;
