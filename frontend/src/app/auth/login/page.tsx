@@ -1,39 +1,34 @@
-// Mark this component as a Client Component because it uses hooks (useState, etc.) for interactivity.
+
 'use client';
 
-// Import necessary React hooks and components.
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { toast } from 'sonner';
 
-// --- FIX 1: Correctly import Axios and the isAxiosError type guard ---
-import axios, { isAxiosError } from 'axios';
-
-// Import UI components from Shadcn.
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import Link from 'next/link';
 
-// Assuming you've run `npx shadcn-ui@latest add toast`, this import will now work.
-import { useToast } from '@/hooks/use-toast';
-
-// Define the validation schema for the login form using Zod.
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-// The main Login Page component.
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -41,89 +36,135 @@ export default function LoginPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      await axios.post(`${apiUrl}/auth/login`, values, { withCredentials: true });
 
-      toast({
-        title: 'Success!',
-        description: 'You have been logged in successfully.',
+    try {
+      const supabase = createClient();
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
       });
 
-      router.push('/dashboard');
-      router.refresh();
-
-    } catch (error) {
-      let errorMessage = 'An unexpected error occurred. Please try again.';
-      
-      // --- FIX 2: Use the imported isAxiosError function as a type guard ---
-      // This safely checks if 'error' is an Axios error and allows TypeScript to access its properties.
-      if (isAxiosError(error) && error.response) {
-        errorMessage = error.response.data.message || errorMessage;
+      if (error) {
+        toast.error('Login Failed', {
+          description: error.message,
+        });
+        return;
       }
 
-      toast({
-        title: 'Login Failed',
-        description: errorMessage,
-        variant: 'destructive',
+      if (data.user) {
+        toast.success('Welcome back!', {
+          description: 'You have successfully logged in.',
+        });
+        
+        router.push('/dashboard');
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Login Failed', {
+        description: 'An unexpected error occurred. Please try again.',
       });
     } finally {
       setIsLoading(false);
     }
   }
 
-  // Render the JSX for the login form.
   return (
-    <div className="flex items-center justify-center min-h-screen bg-brand-bg">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Welcome Back!</CardTitle>
-          <CardDescription>Log in to your Link Up Hub account.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="you@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Log In'}
-              </Button>
-            </form>
-          </Form>
-            <p className="mt-4 text-center text-sm">
-                {`Don't have an account? `}
-                <Link href="/signup" className="underline text-brand-accent">
-                    Sign up
-                </Link>
-            </p>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="max-w-md w-full">
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+            <CardDescription>
+              Sign in to your account to continue
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Enter your email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter your password"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    'Signing in...'
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
+
+            <div className="mt-6 text-center text-sm">
+              <span className="text-gray-600">Don't have an account? </span>
+              <Link
+                href="/auth/signup"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Sign up
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

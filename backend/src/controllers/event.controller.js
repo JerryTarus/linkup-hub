@@ -1,11 +1,9 @@
-// Import the Supabase client for database operations.
-// We use the service role key to bypass RLS for admin-level tasks like event creation.
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // --- Get all events (Public) ---
 // Fetches a list of all events, ordered by the most recently created.
-export const getAllEvents = async (req, res) => {
+const getAllEvents = async (req, res) => {
   try {
     // Select all columns from the 'events' table.
     const { data, error } = await supabase
@@ -26,7 +24,7 @@ export const getAllEvents = async (req, res) => {
 
 // --- Get a single event by ID (Public) ---
 // Fetches detailed information for a specific event.
-export const getEventById = async (req, res) => {
+const getEventById = async (req, res) => {
   try {
     const { id } = req.params; // Get the event ID from the URL parameters.
 
@@ -52,7 +50,7 @@ export const getEventById = async (req, res) => {
 
 // --- Create a new event (Protected, Admin-only) ---
 // Creates a new event record in the database.
-export const createEvent = async (req, res) => {
+const createEvent = async (req, res) => {
   try {
     // The 'protect' and 'checkRole' middleware have already run.
     // The authenticated user's ID is available in req.user.id.
@@ -92,7 +90,7 @@ export const createEvent = async (req, res) => {
 };
 
 // --- Update an existing event (Protected, Admin-only) ---
-export const updateEvent = async (req, res) => {
+const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body; // The fields to update.
@@ -118,7 +116,7 @@ export const updateEvent = async (req, res) => {
 };
 
 // --- Delete an event (Protected, Admin-only) ---
-export const deleteEvent = async (req, res) => {
+const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -155,7 +153,7 @@ const rsvpToEvent = async (req, res) => {
     }
 
     // Check if event is paid (should use payment flow instead)
-    if (event.is_paid) {
+    if (!event.is_free) {
       return res.status(400).json({ 
         message: 'This is a paid event. Please use the payment flow.' 
       });
@@ -171,18 +169,6 @@ const rsvpToEvent = async (req, res) => {
 
     if (existingRSVP) {
       return res.status(400).json({ message: 'You have already RSVP\'d to this event' });
-    }
-
-    // Check if event is at capacity
-    if (event.max_attendees) {
-      const { count } = await supabase
-        .from('event_rsvps')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', eventId);
-
-      if (count >= event.max_attendees) {
-        return res.status(400).json({ message: 'Event is at full capacity' });
-      }
     }
 
     // Create RSVP
@@ -213,9 +199,9 @@ const rsvpToEvent = async (req, res) => {
 };
 
 module.exports = {
-  createEvent,
   getAllEvents,
   getEventById,
+  createEvent,
   updateEvent,
   deleteEvent,
   rsvpToEvent
