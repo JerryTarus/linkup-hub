@@ -8,6 +8,7 @@ import 'dotenv/config';
 import authRoutes from './routes/auth.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import indexRoutes from './routes/index.routes.js';
+import eventRoutes from './routes/event.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -23,7 +24,7 @@ app.use(cookieParser());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/', indexRoutes);
-// Add other routes here (events, users, etc.)
+app.use('/api/v1/events', eventRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

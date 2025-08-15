@@ -1,103 +1,67 @@
-import Image from "next/image";
+// Import Next.js components and Shadcn UI components.
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
 
-export default function Home() {
+// Define a type for our event object for TypeScript safety.
+type Event = {
+  id: string;
+  title: string;
+  description: string;
+  event_date: string;
+};
+
+// This is an async Server Component, allowing us to fetch data directly.
+export default async function LandingPage() {
+  // Fetch a few upcoming events to display on the landing page.
+  // Using { cache: 'no-store' } to ensure data is always fresh on page load.
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/events?limit=3`, {
+    cache: 'no-store',
+  });
+  const recentEvents: Event[] = await res.json();
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="flex flex-col items-center bg-brand-bg text-brand-primary min-h-screen">
+      {/* Hero Section */}
+      <section className="w-full text-center py-20 md:py-32">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
+            Connect, Engage, and Grow
+          </h1>
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-700 mb-8">
+            Discover vibrant events, connect with your community, and manage everything in one place. Your next experience awaits.
+          </p>
+          <Button asChild size="lg" className="bg-brand-accent hover:bg-blue-700">
+            <Link href="/events">
+              Browse All Events <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Featured Events Section */}
+      <section className="w-full bg-white py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-10">Upcoming Events</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {recentEvents.map((event) => (
+              <Card key={event.id} className="hover:shadow-xl transition-shadow">
+                 <CardHeader>
+                    <CardTitle>{event.title}</CardTitle>
+                    <CardDescription>{new Date(event.event_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</CardDescription>
+                  </CardHeader>
+                <CardContent>
+                  <p className="line-clamp-3 text-gray-600 mb-4">{event.description}</p>
+                  <Button asChild variant="outline">
+                    <Link href={`/events/${event.id}`}>View Details</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
