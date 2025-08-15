@@ -10,11 +10,12 @@ import * as z from 'zod';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { createClient } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Image from 'next/image';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -40,8 +41,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      
+            
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
@@ -73,13 +73,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-brand-bg px-4">
       <div className="max-w-md w-full">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+            <Image 
+              src="/images/linkup-hub-logo.jpg"
+              alt="LinkUp Hub Logo"
+              width={60}
+              height={60}
+              className="mx-auto rounded-full mb-4"
+            />
+            <CardTitle className="text-2xl font-bold text-brand-primary">Welcome Back</CardTitle>
             <CardDescription>
-              Sign in to your account to continue
+              Sign in to your account to continue.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -138,7 +145,7 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-brand-accent hover:bg-brand-accent/90"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -157,7 +164,7 @@ export default function LoginPage() {
               <span className="text-gray-600">Don't have an account? </span>
               <Link
                 href="/auth/signup"
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-brand-accent hover:text-brand-accent/80"
               >
                 Sign up
               </Link>

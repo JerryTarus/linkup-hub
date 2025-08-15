@@ -6,7 +6,7 @@ import { Calendar, Users, CreditCard, MessageCircle, Shield, Zap } from 'lucide-
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
   
   // Fetch recent events for the landing page
   const { data: recentEvents, error } = await supabase

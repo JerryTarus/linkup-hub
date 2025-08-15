@@ -1,5 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+import { supabase } from '../lib/supabase.js';
 
 // --- Get all events (Public) ---
 // Fetches a list of all events, ordered by the most recently created.
@@ -198,7 +197,7 @@ const rsvpToEvent = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   getAllEvents,
   getEventById,
   createEvent,

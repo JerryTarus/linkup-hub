@@ -1,12 +1,12 @@
 
-const express = require('express');
-const { authenticateToken } = require('../middleware/auth.middleware');
-const { updateProfile, getProfile } = require('../controllers/profile.controller');
+import express from 'express';
+import { protect } from '../middleware/auth.middleware.js';
+import { updateProfile, getProfile } from '../controllers/profile.controller.js';
 
 const router = express.Router();
 
 // Protected routes
-router.get('/me', authenticateToken, getProfile);
-router.put('/me', authenticateToken, updateProfile);
+router.get('/me', protect, getProfile);
+router.put('/me', protect, updateProfile);
 
-module.exports = router;
+export default router;

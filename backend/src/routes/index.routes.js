@@ -2,10 +2,10 @@ import { Router } from 'express';
 
 const router = Router();
 
-const authRoutes = require('./auth.routes');
-const eventRoutes = require('./event.routes');
-const paymentRoutes = require('./payment.routes');
-const profileRoutes = require('./profile.routes');
+import authRoutes from './auth.routes.js';
+import eventRoutes from './event.routes.js';
+import paymentRoutes from './payment.routes.js';
+import profileRoutes from './profile.routes.js';
 
 router.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the LinkUp Hub API!' });

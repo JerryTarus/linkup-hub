@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from 'joi';
 
 const validateRequest = (schema) => {
   return (req, res, next) => {
@@ -42,7 +42,7 @@ const schemas = {
   })
 };
 
-module.exports = {
+export {
   validateRequest,
   schemas
 };

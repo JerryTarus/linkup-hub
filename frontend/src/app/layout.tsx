@@ -5,6 +5,8 @@ import "./globals.css";
 
 // --- Import the Toaster from Sonner ---
 import { Toaster } from "@/components/ui/sonner";
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,11 +34,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Header />
+        <main className="pt-16">
+          {children}
+        </main>
         
         {/* --- Add the Toaster component here --- */}
         {/* This will render notifications anywhere in your app. */}
         <Toaster richColors position="top-right" />
+        <Footer />
       </body>
     </html>
   );

@@ -1,13 +1,13 @@
-const express = require('express');
-const { protect, checkRole } = require('../middleware/auth.middleware');
-const {
+import express from 'express';
+import { protect, checkRole } from '../middleware/auth.middleware.js';
+import {
   createEvent,
   getAllEvents,
   getEventById,
   updateEvent,
   deleteEvent,
   rsvpToEvent
-} = require('../controllers/event.controller');
+} from '../controllers/event.controller.js';
 
 const router = express.Router();
 
@@ -23,4 +23,4 @@ router.delete('/:id', protect, checkRole(['Admin', 'Super Admin']), deleteEvent)
 // RSVP route
 router.post('/:id/rsvp', protect, rsvpToEvent);
 
-module.exports = router;
+export default router;

@@ -1,12 +1,12 @@
 
-const { supabase } = require('../lib/supabase');
+import { supabase } from '../lib/supabase.js';
 
 const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
     const { data: user, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
@@ -38,7 +38,7 @@ const updateProfile = async (req, res) => {
 
     // Check if username is already taken by another user
     const { data: existingUser } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id')
       .eq('username', username.trim())
       .neq('id', userId)
@@ -50,7 +50,7 @@ const updateProfile = async (req, res) => {
 
     // Update user profile
     const { data: updatedUser, error } = await supabase
-      .from('users')
+      .from('profiles')
       .update({
         username: username.trim(),
         bio: bio?.trim() || null,
@@ -80,7 +80,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   getProfile,
   updateProfile
 };
