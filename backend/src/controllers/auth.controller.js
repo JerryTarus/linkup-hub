@@ -1,15 +1,7 @@
 // Import necessary libraries
 import bcrypt from 'bcryptjs'; // For hashing and comparing passwords securely.
 import jwt from 'jsonwebtoken'; // For creating and verifying JSON Web Tokens.
-import { createClient } from '@supabase/supabase-js'; // Supabase client for database interaction.
-
-// Initialize the Supabase client using environment variables.
-// Using the SERVICE_ROLE_KEY gives us admin-level access to bypass RLS,
-// which is necessary for actions like user creation and profile lookups.
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { supabase } from '../lib/supabase.js'; // Import the centralized Supabase client.
 
 // --- User Signup Controller ---
 export const signup = async (req, res) => {

@@ -1,7 +1,12 @@
 // Import the Express router to define API endpoints.
 import { Router } from 'express';
 // Import controller functions that contain the logic for each route.
-import { signup, login, logout, getMe } from '../controllers/auth.controller.js';
+import {
+  signup,
+  login,
+  logout,
+  getMe,
+} from '../controllers/auth.controller.js';
 // Import middleware to protect routes that require authentication.
 import { protect } from '../middleware/auth.middleware.js';
 

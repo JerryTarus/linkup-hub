@@ -1,13 +1,7 @@
 // Import axios for making HTTP requests to the Daraja API.
 import axios from 'axios';
 // Import the Supabase client to update our database after payment events.
-import { createClient } from '@supabase/supabase-js';
-
-// Initialize Supabase client with admin privileges.
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { supabase } from '../lib/supabase.js';
 
 // Determine the correct Daraja API base URL based on the environment.
 const DARAJA_API_URL = process.env.NODE_ENV === 'production'
